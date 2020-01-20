@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>4326 wmts</title>
+</head>
+
+<body style=" margin: 0;overflow: hidden;background: #fff;width: 100%;height:100%;position: absolute;top: 0;">
+    <div id="map" style="margin:0 auto;width: 100%;height: 100%"></div>
+    <script type="text/javascript" src="../../dist/include-leaflet.js"></script>
+    <script type="text/javascript">
+        var res = [0.0027465820312500074, 0.0013732910156249987, 6.866455078124993E-4, 3.433227539062509E-4,
+            1.7166137695312497E-4, 8.583068847656249E-5, 4.291534423828124E-5, 2.145767211914062E-5,
+            1.072883605957031E-5, 5.364418029785166E-6, 2.682209014892583E-6, 1.3411045074462916E-6
+        ];
+        var map = L.map('map', {
+            // center
+            // [lat,lon] 或 L.latLng(lat, lon) 或 {lon: 30, lat: 50} 或 {lat: 50, lng: 30}
+            center: [39.441570142096126,116.20934993335362],   
+            maxZoom: 12,
+            zoom: 2,
+            maxBounds: L.latLngBounds(L.latLng(39.441570142096126, 116.20934993335362), L.latLng(39.83089881098218, 116.72111943584403)),
+            // crs: L.CRS.EPSG4326
+            crs: L.Proj.CRS("EPSG:4326", {
+                origin: L.point(116.20934993335362, 39.83089881098218),
+                resolutions: res  // 分辨率
+            })
+        });
+        L.supermap.wmtsLayer("http://172.25.117.10:8081/geoesb/proxy/0cb38c2afd5c42368348371375eb48d3/b2f56f3e1cb441728587baa666256959", {
+            layer: "daxing",
+            style: "default",
+            tilematrixSet: "Custom_daxing",
+            format: "image/png",
+            requestEncoding: 'REST',
+            attribution: "Map Data <span>© <a href='http://support.supermap.com.cn/product/iServer.aspx' target='_blank'>SuperMap iServer</a></span>"
+        }).addTo(map);
+
+    </script>
+</body>
+
+</html>

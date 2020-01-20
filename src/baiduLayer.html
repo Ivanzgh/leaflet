@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>百度地图图层</title>
+    <link rel="stylesheet" href="../leaflet/leaflet.css">
+    <script src="../leaflet/leaflet.js"></script>
+    <script src="https://cdn.bootcss.com/proj4js/2.5.0/proj4.js"></script>
+    <script src="https://cdn.bootcss.com/proj4leaflet/1.0.2/proj4leaflet.js"></script>
+</head>
+
+<body>
+    <div id="map" style="width: 100vw;height:100vh;"></div>
+    <script>
+        // 初始化百度地图瓦片图层，投影坐标转换以纠偏地图显示问题
+        const baiduCrs = new L.Proj.CRS(
+            "EPSG:900913",
+            "+proj=merc +a=6378206 +b=6356584.314245179 +lat_ts=0.0 +lon_0=0.0 +x_0=0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs", {
+                resolutions: (function () {
+                    level = 19;
+                    var res = [];
+                    res[0] = Math.pow(2, 18);
+                    for (var i = 1; i < level; i++) {
+                        res[i] = Math.pow(2, 18 - i);
+                    }
+                    return res;
+                })(),
+                origin: [0, 0],
+                bounds: L.bounds([20037508.342789244, 0], [0, 20037508.342789244])
+            }
+        );
+
+        const mymap = L.map("map", {
+            center: [39.90923, 116.397428],
+            zoom: 12,
+            crs: baiduCrs,
+        });
+
+        // TileLayer 扩展
+        L.TileLayer.BaiduLayer = L.TileLayer.extend({
+            options: {
+                minZoom: 3,
+                maxZoom: 18,
+                style: "normal",
+                tms: true
+            },
+            _urls: {
+                normal: "https://ss0.bdstatic.com/8bo_dTSlRsgBo1vgoIiO_jowehsv/tile/?qt=tile&x={x}&y={y}&z={z}&styles=pl&scaler=2&udt=20170803",
+                weixing: "https://ss0.bdstatic.com/5bwHcj7lABFT8t_jkk_Z1zRvfdw6buu/it/u=x={x};y={y};z={z};v=009;type=sate&fm=46&udt=20170803"
+            },
+            _weixing_label_url: "https://ss0.bdstatic.com/8bo_dTSlRMgBo1vgoIiO_jowehsv/tile/?qt=tile&x={x}&y={y}&z={z}&styles=sl&udt=20141015",
+            
+            initialize: function (options) {
+                let that = this;
+                let url;
+                if (options.url) {
+                    url = options.url;
+                } else if (options.style) {
+                    url = that._urls[options.style];
+                }
+
+                url || (url = that._urls["normal"]);
+                L.TileLayer.prototype.initialize.call(this, url, options);
+
+                if ("weixing" == options.style) {
+                    that.labelLayer = new L.TileLayer.BaiduLayer({
+                        url: that._weixing_label_url
+                    });
+
+                    that.on("add", function () {
+                        that.labelLayer.addTo(that._map);
+                    });
+                }
+            },
+
+            getTileUrl: function (t) {
+                return L.TileLayer.prototype.getTileUrl.call(this, t);
+            }
+        });
+
+        L.tileLayer.baiduLayer = function (options) {
+            return new L.TileLayer.BaiduLayer(options);
+        };
+
+        const baiduLayer = L.tileLayer.baiduLayer({
+            style: "normal"
+        });
+        baiduLayer.addTo(mymap);
+    </script>
+</body>
+
+</html>

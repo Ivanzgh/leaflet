@@ -1,0 +1,22 @@
+{
+  "name": "leaflet.js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ivanzgh/leaflet.git"
+  },
+  "author": "zgh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ivanzgh/leaflet/issues"
+  },
+  "homepage": "https://github.com/Ivanzgh/leaflet#readme",
+  "dependencies": {
+    "leaflet": "^1.6.0"
+  }
+}

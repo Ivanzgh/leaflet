@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>创建点线面</title>
+</head>
+
+<body style=" margin: 0;overflow: hidden;background: #fff;width: 100%;height:100%;position: absolute;top: 0;">
+    <div id="map" style="width: 100%;height:100%"></div>
+    <script type="text/javascript" include="leaflet.draw" src="../../dist/include-leaflet.js"></script>
+    <script type="text/javascript">
+        let res = [0.0027465820312500074, 0.0013732910156249987, 6.866455078124993E-4, 3.433227539062509E-4,
+            1.7166137695312497E-4, 8.583068847656249E-5, 4.291534423828124E-5, 2.145767211914062E-5,
+            1.072883605957031E-5, 5.364418029785166E-6, 2.682209014892583E-6, 1.3411045074462916E-6
+        ];
+        let map = L.map('map', {
+            center: [39.441570142096126, 116.20934993335362],
+            maxZoom: 12,
+            zoom: 2,
+            maxBounds: L.latLngBounds(L.latLng(39.441570142096126, 116.20934993335362), L.latLng(39.83089881098218, 116.72111943584403)),
+            crs: L.Proj.CRS("EPSG:4326", {
+                origin: L.point(116.20934993335362, 39.83089881098218),
+                resolutions: res
+            })
+        });
+        L.supermap.wmtsLayer("http://172.25.117.10:8081/geoesb/proxy/0cb38c2afd5c42368348371375eb48d3/b2f56f3e1cb441728587baa666256959", {
+            layer: "daxing",
+            style: "default",
+            tilematrixSet: "Custom_daxing",
+            format: "image/png",
+            requestEncoding: 'REST',
+            attribution: "Map Data <span>© <a href='http://support.supermap.com.cn/product/iServer.aspx' target='_blank'>SuperMap iServer</a></span>"
+        }).addTo(map);
+
+        /**
+         * 创建线
+        */
+        let latlngs = [
+            [39.441570142096126, 116.20934993335362],
+            [39.541570142096126, 116.30934993335362],
+            [39.641570142096126, 116.40934993335362]
+        ];
+        let polyline = L.polyline(latlngs, { color: '#f00', weight: 6, opacity: 0.6 }).addTo(map);
+
+        /**
+         * 创建圆形
+        */
+        let circle = L.circle([39.83089881098218, 116.20934993335362], { radius: 2000 }).addTo(map);
+
+        /**
+         * 创建点标记
+        */
+        let marker = L.marker([39.63089881098218, 116.26934993335362], { draggable: true }).addTo(map);
+
+        /**
+         * 创建圆标记
+        */
+        let circleMarker = L.circleMarker([39.641570142096126, 116.40934993335362], { radius: 100, fillColor: '#0f0', stroke: false }).addTo(map);
+
+        /**
+         * 创建多边形
+        */
+        let polygon = L.polygon([[39.841570142096126, 116.60934993335362], [39.561570142096126, 116.50934993335362], [39.641570142096126, 116.80934993335362]]).addTo(map).bindPopup("点我干啥！");
+
+
+        /**
+         * 自定义点标记
+        */
+        let CustomerIcon = L.Icon.extend({
+            options: {
+                iconUrl: '../../assets/leaf-green.png',
+                shadowUrl: '../../assets/leaf-shadow.png',
+                iconSize: [38, 95], // size of the icon
+                shadowSize: [50, 64], // size of the shadow
+                iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+                shadowAnchor: [4, 62],  // the same for the shadow
+                popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+            }
+        })
+        map.on('click', (ev) => {
+            console.log(ev)
+            new L.Marker(ev.latlng, {
+                icon: new CustomerIcon()
+            }).addTo(map).bindPopup("I am a green leaf.")
+        })
+
+        /**
+         * 监听圆形的点击事件
+        */
+        circle.on('click', function () {
+            alert('我是圆形，我被点了')
+        })
+
+        /**
+         * 监听圆形的悬浮事件
+        */
+        circle.on('mouseover', function () {
+            alert('over')
+        })
+        circle.on('mouseout', function () {
+            alert('out')
+        })
+
+        /**
+         * 监听点标记拖拽结束事件
+        */
+        marker.on('dragend', function () {
+            var position = marker.getLatLng()
+            console.log('实时坐标：' + position);
+        })
+
+    </script>
+</body>
+
+</html>

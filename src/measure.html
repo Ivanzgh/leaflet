@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>测量服务</title>
+</head>
+
+<body style=" margin: 0;overflow: hidden;background: #fff;width: 100%;height:100%;position: absolute;top: 0;">
+    <div id="map" style="margin:0 auto;width: 100%;height: 100%"></div>
+    <script type="text/javascript" src="../../dist/include-leaflet.js"></script>
+    <script type="text/javascript">
+        var map, resultLayer, url = "http://172.25.117.10:8081/geoesb/proxy/0cb38c2afd5c42368348371375eb48d3/b2f56f3e1cb441728587baa666256959";
+        var res = [0.0027465820312500074, 0.0013732910156249987, 6.866455078124993E-4, 3.433227539062509E-4,
+            1.7166137695312497E-4, 8.583068847656249E-5, 4.291534423828124E-5, 2.145767211914062E-5,
+            1.072883605957031E-5, 5.364418029785166E-6, 2.682209014892583E-6, 1.3411045074462916E-6
+        ];
+
+        map = L.map('map', {
+            preferCanvas: true,
+            center: [39.441570142096126, 116.20934993335362],
+            maxZoom: 12,
+            zoom: 2,
+            maxBounds: L.latLngBounds(L.latLng(39.441570142096126, 116.20934993335362), L.latLng(39.83089881098218, 116.72111943584403)),
+            crs: L.Proj.CRS("EPSG:4326", {
+                origin: L.point(116.20934993335362, 39.83089881098218),
+                resolutions: res
+            })
+        });
+        L.supermap.wmtsLayer(url, {
+            layer: "daxing",
+            style: "default",
+            tilematrixSet: "Custom_daxing",
+            format: "image/png",
+            requestEncoding: 'REST',
+            attribution: "Map Data <span>© <a href='http://support.supermap.com.cn/product/iServer.aspx' target='_blank'>SuperMap iServer</a></span>"
+        }).addTo(map);
+
+        resultLayer = L.featureGroup().addTo(map);
+
+        measureDistance();
+
+        function measureDistance() {
+            var polyLine = L.polyline([[39.441570142096126, 116.20934993335362], [39.841570142096126, 116.50934993335362]], { color: "red" });
+            var marker1 = L.marker([39.441570142096126, 116.20934993335362]), marker2 = L.marker([39.841570142096126, 116.50934993335362]);
+            resultLayer.addLayer(polyLine);
+            resultLayer.addLayer(marker1);
+            resultLayer.addLayer(marker2);
+            var distanceMeasureParam = new SuperMap.MeasureParameters(polyLine);
+            L.supermap
+                .measureService(url)
+                .measureDistance(distanceMeasureParam, function (serviceResult) {
+                    var content = "距离： " + serviceResult.result.distance + "  米";
+                    marker1.bindPopup(content).openPopup(marker1.getLatLng());
+                });
+        }
+
+        measureArea();
+
+        function measureArea() {
+            var polygon = L.polygon([[39.841570142096126, 116.60934993335362], [39.561570142096126, 116.50934993335362], [39.641570142096126, 116.80934993335362]], { color: "red" });
+            resultLayer.addLayer(polygon);
+            var areaMeasureParam = new SuperMap.MeasureParameters(polygon);
+            L.supermap
+                .measureService(url)
+                .measureArea(areaMeasureParam, function (serviceResult) {
+                    var content = "面积： " + serviceResult.result.area + "  平方米";
+                    polygon.bindPopup(content).openPopup(polygon.getCenter());
+                });
+
+        }
+    </script>
+</body>
+
+</html>
